@@ -1,0 +1,40 @@
+# =========================
+# Laravel Backend
+# =========================
+
+backend/vendor/
+backend/node_modules/
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+backend/storage/*.key
+backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/bootstrap/cache/*
+
+
+# =========================
+# Next.js Frontend
+# =========================
+
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+
+# =========================
+# General
+# =========================
+
+*.log
+.DS_Store
+Thumbs.db
