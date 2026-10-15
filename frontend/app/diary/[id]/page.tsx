@@ -33,24 +33,33 @@ export default function DiaryDetailPage() {
   const [entryDate, setEntryDate] = useState('');
 
   useEffect(() => {
-    if (id) fetchDiaryDetail();
-  }, [id]);
+    if (!id) return;
 
-  const fetchDiaryDetail = async () => {
-    try {
-      const res = await apiClient.get(`/diaries/${id}`);
-      const data = res.data.data;
-      setDiary(data);
-      setTitle(data.title);
-      setContent(data.content);
-      setMood(data.mood);
-      setEntryDate(data.entry_date);
-    } catch (err) {
-      console.error('Gagal mengambil detail diary:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    let cancelled = false;
+
+    const fetchDiaryDetail = async () => {
+      try {
+        const res = await apiClient.get(`/diaries/${id}`);
+        const data = res.data.data;
+        if (cancelled) return;
+        setDiary(data);
+        setTitle(data.title);
+        setContent(data.content);
+        setMood(data.mood);
+        setEntryDate(data.entry_date);
+      } catch (error) {
+        console.error('Gagal mengambil detail diary:', error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    fetchDiaryDetail();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +72,7 @@ export default function DiaryDetailPage() {
       });
       setDiary(res.data.data);
       setIsEditing(false);
-    } catch (err) {
+    } catch {
       alert('Gagal memperbarui diary.');
     }
   };
@@ -73,7 +82,7 @@ export default function DiaryDetailPage() {
     try {
       await apiClient.delete(`/diaries/${id}`);
       router.push('/diary');
-    } catch (err) {
+    } catch {
       alert('Gagal menghapus diary.');
     }
   };

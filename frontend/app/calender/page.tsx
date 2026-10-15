@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import { apiClient } from '@/services/api';
 import { Diary } from '@/types';
 import Link from 'next/link';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function CalendarPage() {
   const [diaries, setDiaries] = useState<Diary[]>([]);
@@ -13,20 +13,26 @@ export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   useEffect(() => {
-    fetchDiaries();
-  }, []);
+    let cancelled = false;
 
-  const fetchDiaries = async () => {
-    try {
-      const res = await apiClient.get('/diaries');
-      const data = res.data.data?.data || res.data.data || [];
-      setDiaries(data);
-    } catch (err) {
-      console.error('Gagal mengambil data kalender diary:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchDiaries = async () => {
+      try {
+        const res = await apiClient.get('/diaries');
+        const data = res.data.data?.data || res.data.data || [];
+        if (!cancelled) setDiaries(data);
+      } catch (err) {
+        console.error('Gagal mengambil data kalender diary:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    fetchDiaries();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();

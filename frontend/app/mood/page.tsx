@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { apiClient } from '@/services/api';
-import { Diary, MoodStats } from '@/types';
+import { Diary, MoodStats, MoodType } from '@/types';
 import { Smile, Sparkles, BarChart2 } from 'lucide-react';
 
 export default function MoodTrackerPage() {
@@ -11,34 +11,40 @@ export default function MoodTrackerPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
+    const fetchMoodStats = async () => {
+      try {
+        const res = await apiClient.get('/diaries');
+        const diaries: Diary[] = res.data.data?.data || res.data.data || [];
+
+        const total = diaries.length;
+        const counts: Record<string, number> = {};
+
+        diaries.forEach((d) => {
+          counts[d.mood] = (counts[d.mood] || 0) + 1;
+        });
+
+        const calculated: MoodStats[] = Object.keys(counts).map((mood) => ({
+          mood: mood as MoodType,
+          count: counts[mood],
+          percentage: total > 0 ? Math.round((counts[mood] / total) * 100) : 0,
+        }));
+
+        if (!cancelled) setStats(calculated);
+      } catch (err) {
+        console.error('Gagal mengambil statistik mood:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
     fetchMoodStats();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
-
-  const fetchMoodStats = async () => {
-    try {
-      const res = await apiClient.get('/diaries');
-      const diaries: Diary[] = res.data.data?.data || res.data.data || [];
-      
-      const total = diaries.length;
-      const counts: Record<string, number> = {};
-
-      diaries.forEach((d) => {
-        counts[d.mood] = (counts[d.mood] || 0) + 1;
-      });
-
-      const calculated: MoodStats[] = Object.keys(counts).map((mood) => ({
-        mood: mood as any,
-        count: counts[mood],
-        percentage: total > 0 ? Math.round((counts[mood] / total) * 100) : 0,
-      }));
-
-      setStats(calculated);
-    } catch (err) {
-      console.error('Gagal mengambil statistik mood:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FDFBF7]">

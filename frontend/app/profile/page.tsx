@@ -3,11 +3,9 @@
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { apiClient } from '@/services/api';
-import { User } from '@/types';
 import { User as UserIcon, Mail, Save, Sparkles, CheckCircle } from 'lucide-react';
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<User | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(true);
@@ -15,22 +13,28 @@ export default function ProfilePage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    let cancelled = false;
 
-  const fetchProfile = async () => {
-    try {
-      const res = await apiClient.get('/user');
-      const data = res.data.data || res.data;
-      setUser(data);
-      setName(data.name);
-      setEmail(data.email);
-    } catch (err) {
-      console.error('Gagal mengambil profil:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchProfile = async () => {
+      try {
+        const res = await apiClient.get('/user');
+        const data = res.data.data || res.data;
+        if (cancelled) return;
+        setName(data.name);
+        setEmail(data.email);
+      } catch (err) {
+        console.error('Gagal mengambil profil:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    fetchProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,10 +43,15 @@ export default function ProfilePage() {
 
     try {
       const res = await apiClient.put('/user/profile', { name, email });
-      setUser(res.data.data || res.data);
+      const data = res.data.data || res.data;
+      setName(data.name ?? name);
+      setEmail(data.email ?? email);
       setSuccessMessage('Profil berhasil diperbarui.');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Gagal memperbarui profil.');
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || 'Gagal memperbarui profil.';
+      setError(message);
     }
   };
 
@@ -56,7 +65,7 @@ export default function ProfilePage() {
             <Sparkles className="w-3.5 h-3.5" /> Account Settings
           </span>
           <h1 className="text-2xl font-bold text-[#5A4D41]">Profil Pengguna</h1>
-          <p className="text-sm text-[#8C7A6B]">Kelola informasi akun pribadi Elsya's Diary.</p>
+          <p className="text-sm text-[#8C7A6B]">Kelola informasi akun pribadi Elsya&apos;s Diary.</p>
         </div>
 
         {successMessage && (

@@ -1,50 +1,56 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { apiClient } from '@/services/api';
-import { Diary, MoodType } from '@/types';
+import { Diary } from '@/types';
 import Link from 'next/link';
 import { BookOpen, PlusCircle, Search, Filter, Trash2, Calendar } from 'lucide-react';
 
 export default function DiaryListPage() {
   const [diaries, setDiaries] = useState<Diary[]>([]);
-  const [filteredDiaries, setFilteredDiaries] = useState<Diary[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMood, setSelectedMood] = useState<string>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
+    const fetchDiaries = async () => {
+      try {
+        const res = await apiClient.get('/diaries');
+        const data = res.data.data?.data || res.data.data || [];
+        if (!cancelled) setDiaries(data);
+      } catch (err) {
+        console.error('Gagal mengambil daftar diary:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
     fetchDiaries();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  useEffect(() => {
+  // Hasil filter dihitung langsung, tanpa state tambahan
+  const filteredDiaries = useMemo(() => {
     let result = diaries;
     if (searchQuery) {
+      const q = searchQuery.toLowerCase();
       result = result.filter(
         (d) =>
-          d.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          d.content.toLowerCase().includes(searchQuery.toLowerCase())
+          d.title.toLowerCase().includes(q) ||
+          d.content.toLowerCase().includes(q)
       );
     }
     if (selectedMood !== 'all') {
       result = result.filter((d) => d.mood === selectedMood);
     }
-    setFilteredDiaries(result);
+    return result;
   }, [searchQuery, selectedMood, diaries]);
-
-  const fetchDiaries = async () => {
-    try {
-      const res = await apiClient.get('/diaries');
-      const data = res.data.data?.data || res.data.data || [];
-      setDiaries(data);
-      setFilteredDiaries(data);
-    } catch (err) {
-      console.error('Gagal mengambil daftar diary:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDelete = async (id: number, e: React.MouseEvent) => {
     e.preventDefault();
@@ -52,8 +58,8 @@ export default function DiaryListPage() {
 
     try {
       await apiClient.delete(`/diaries/${id}`);
-      setDiaries(diaries.filter((d) => d.id !== id));
-    } catch (err) {
+      setDiaries((prev) => prev.filter((d) => d.id !== id));
+    } catch {
       alert('Gagal menghapus diary.');
     }
   };

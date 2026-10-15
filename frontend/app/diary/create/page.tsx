@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { apiClient } from '@/services/api';
 import { MoodType } from '@/types';
-import { ArrowLeft, Save, Sparkles } from 'lucide-react';
+import { Save, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 const moods: { type: MoodType; label: string; emoji: string }[] = [
@@ -44,8 +44,11 @@ export default function CreateDiaryPage() {
         entry_date: entryDate,
       });
       router.push('/diary');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Gagal menyimpan diary.');
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || 'Gagal menyimpan diary.';
+      setError(message);
     } finally {
       setLoading(false);
     }

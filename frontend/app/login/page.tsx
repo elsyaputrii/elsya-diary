@@ -26,15 +26,19 @@ export default function LoginPage() {
     try {
       const response = await apiClient.post('/login', { email, password });
       const token = response.data.token || response.data.data?.token;
-      
+
       if (token) {
         sessionStorage.setItem('auth_token', token);
         router.push('/');
       } else {
         setError('Login gagal: Token tidak ditemukan dalam respons server.');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Terjadi kesalahan saat masuk. Periksa kembali kredensial Anda.');
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ||
+        'Terjadi kesalahan saat masuk. Periksa kembali kredensial Anda.';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -47,7 +51,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#F7EBE8] text-[#7D5A50] mb-3">
             <Sparkles className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-[#5A4D41]">Welcome Back to Elsya's Diary</h1>
+          <h1 className="text-2xl font-bold text-[#5A4D41]">Welcome Back to elsya cantik ❤️</h1>
           <p className="text-sm text-[#8C7A6B] mt-1">Silakan masuk untuk menulis dan membaca diary kamu.</p>
         </div>
 

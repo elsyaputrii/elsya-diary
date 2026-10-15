@@ -5,27 +5,33 @@ import Navbar from '@/components/Navbar';
 import { apiClient } from '@/services/api';
 import { Diary } from '@/types';
 import Link from 'next/link';
-import { BookOpen, PlusCircle, Sparkles, Smile, Calendar as CalendarIcon, ArrowRight } from 'lucide-react';
+import { BookOpen, PlusCircle, Sparkles, ArrowRight } from 'lucide-react';
 
 export default function HomePage() {
   const [diaries, setDiaries] = useState<Diary[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchRecentDiaries();
-  }, []);
+    let cancelled = false;
 
-  const fetchRecentDiaries = async () => {
-    try {
-      const res = await apiClient.get('/diaries');
-      const data = res.data.data?.data || res.data.data || [];
-      setDiaries(data.slice(0, 3));
-    } catch (err) {
-      console.error('Gagal mengambil data diary:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchRecentDiaries = async () => {
+      try {
+        const res = await apiClient.get('/diaries');
+        const data = res.data.data?.data || res.data.data || [];
+        if (!cancelled) setDiaries(data.slice(0, 3));
+      } catch (err) {
+        console.error('Gagal mengambil data diary:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    fetchRecentDiaries();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FDFBF7]">
@@ -33,10 +39,10 @@ export default function HomePage() {
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-12">
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-[#F7EBE8] to-[#F3E2DC] rounded-3xl p-8 md:p-12 mb-10 border border-[#EBD6D0] shadow-sm relative overflow-hidden">
+        <div className="bg-linear-to-r from-[#F7EBE8] to-[#F3E2DC] rounded-3xl p-8 md:p-12 mb-10 border border-[#EBD6D0] shadow-sm relative overflow-hidden">
           <div className="relative z-10 max-w-xl">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/70 text-[#7D5A50] text-xs font-semibold mb-4">
-              <Sparkles className="w-3.5 h-3.5" /> Elsya's Personal Sanctuary
+              <Sparkles className="w-3.5 h-3.5" /> Elsya Personal Sanctuary
             </span>
             <h1 className="text-3xl md:text-4xl font-bold text-[#5A4D41] mb-3">
               Catat setiap cerita, emosi, dan kenangan indahmu hari ini.
