@@ -32,7 +32,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 bg-[#FFFDF9]/90 backdrop-blur-md border-b border-[#F0E6DD] shadow-xs">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <Link href="/" className="text-xl font-bold text-[#7D5A50] tracking-tight hover:opacity-80 transition">
-          ✨ Elsya's Diary
+          ✨ Elsya Diary
         </Link>
 
         <nav className="hidden md:flex items-center space-x-1">

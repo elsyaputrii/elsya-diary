@@ -1,4 +1,8 @@
-import axios from 'axios';
+import axios, {
+  AxiosError,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -6,13 +10,13 @@ export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   },
   withCredentials: true,
 });
 
 apiClient.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
     if (typeof window !== 'undefined') {
       const token = sessionStorage.getItem('auth_token');
       if (token) {
@@ -21,15 +25,17 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error: AxiosError) => Promise.reject(error)
 );
 
 apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  (response: AxiosResponse) => response,
+  (error: AxiosError) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
       sessionStorage.removeItem('auth_token');
-      window.location.href = '/login';
+      // File ini bukan komponen React, jadi useRouter/redirect tidak bisa dipakai.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.assign('/login');
     }
     return Promise.reject(error);
   }
