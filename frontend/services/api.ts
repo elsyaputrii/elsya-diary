@@ -31,7 +31,12 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
+    // Login/Register yang salah juga bisa membalas 401. Jangan redirect di sini,
+    // supaya pesan error tetap tampil di form (bukan halaman ter-reload).
+    const url = error.config?.url ?? '';
+    const isAuthRequest = url.includes('/login') || url.includes('/register');
+
+    if (error.response?.status === 401 && !isAuthRequest && typeof window !== 'undefined') {
       sessionStorage.removeItem('auth_token');
       // File ini bukan komponen React, jadi useRouter/redirect tidak bisa dipakai.
       // eslint-disable-next-line @next/next/no-location-assign-relative-destination

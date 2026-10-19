@@ -43,3 +43,11 @@ export interface PaginatedResponse<T> {
     total: number;
   };
 }
+
+/** Data yang dikirim ke backend saat membuat / mengubah diary. */
+export interface DiaryPayload {
+  title: string;
+  content: string;
+  mood: MoodType;
+  entry_date: string; // format YYYY-MM-DD
+}

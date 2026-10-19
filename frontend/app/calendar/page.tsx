@@ -45,13 +45,17 @@ export default function CalendarPage() {
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
   ];
 
-  const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
-  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+  // Selalu pindah tepat satu bulan, aman melewati pergantian tahun
+  const prevMonth = () =>
+    setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  const nextMonth = () =>
+    setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
 
   // Map diaries by date string YYYY-MM-DD
   const diaryMap: Record<string, Diary> = {};
   diaries.forEach((d) => {
-    diaryMap[d.entry_date] = d;
+    // Ambil hanya bagian YYYY-MM-DD, aman untuk format "2026-10-16T00:00:00Z"
+    diaryMap[String(d.entry_date).slice(0, 10)] = d;
   });
 
   return (
@@ -65,13 +69,23 @@ export default function CalendarPage() {
             <p className="text-sm text-[#8C7A6B]">Telusuri catatan berdasarkan tanggal penulisan.</p>
           </div>
           <div className="flex items-center gap-2 bg-[#FFFDF9] border border-[#F0E6DD] rounded-2xl p-1 shadow-xs">
-            <button onClick={prevMonth} className="p-2 hover:bg-[#F7F0EB] rounded-xl text-[#7D5A50] transition">
+            <button
+              type="button"
+              aria-label="Bulan sebelumnya"
+              onClick={prevMonth}
+              className="p-2 hover:bg-[#F7F0EB] rounded-xl text-[#7D5A50] transition"
+            >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="px-4 text-sm font-bold text-[#5A4D41]">
               {monthNames[month]} {year}
             </span>
-            <button onClick={nextMonth} className="p-2 hover:bg-[#F7F0EB] rounded-xl text-[#7D5A50] transition">
+            <button
+              type="button"
+              aria-label="Bulan berikutnya"
+              onClick={nextMonth}
+              className="p-2 hover:bg-[#F7F0EB] rounded-xl text-[#7D5A50] transition"
+            >
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>

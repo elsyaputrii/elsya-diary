@@ -60,7 +60,7 @@ export default function Sidebar() {
         <div className="flex items-center justify-between md:justify-start gap-2 mb-6 md:mb-8">
           <Link href="/diary" className="flex items-center gap-2">
             <span className="text-2xl">🌷</span>
-            <h1 className="font-semibold text-xl text-gray-800 tracking-wide">Elsya's Diary</h1>
+            <h1 className="font-semibold text-xl text-gray-800 tracking-wide">Elsya&apos;s Diary</h1>
           </Link>
         </div>
 

@@ -38,3 +38,4 @@ frontend/.env.production.local
 *.log
 .DS_Store
 Thumbs.db
+frontend/STRUCTURE.md
